@@ -140,6 +140,11 @@ $output = shell_exec("cd {$projectDir} && git pull 2>&1");
 echo $output;
 ?>
 
+    sudo visudo
+
+#APACHE Y GITHUB
+apache ALL=(ALL) NOPASSWD: /usr/bin/git
+
     crear el webhook en el repositorio de GITHUB con el archivo php:
 
     http://ec2-51-92-121-143.eu-south-2.compute.amazonaws.com/esc-backend/webhookgithub.php
