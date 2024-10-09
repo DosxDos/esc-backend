@@ -1,0 +1,145 @@
+SSH HOST
+    ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
+
+CONFIGURACIÓN INICIAL
+
+    sudo yum update -y
+
+    sudo yum install httpd -y
+
+    sudo systemctl start httpd
+    sudo systemctl enable httpd
+
+    sudo yum install php php-mysqlnd php-gd php-xml -y
+
+    sudo systemctl restart httpd
+
+    echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+
+    sudo yum install vsftpd -y
+
+    sudo nano /etc/vsftpd/vsftpd.conf
+    anonymous_enable=NO (para deshabilitar acceso anónimo).
+    local_enable=YES (para permitir acceso a usuarios locales).
+    write_enable=YES (para permitir escritura).
+    chroot_local_user=YES
+    allow_writeable_chroot=YES
+
+    sudo adduser ftpuser
+    sudo passwd ftpuser
+
+    sudo chown -R ftpuser:ftpuser /var/www/html
+
+    sudo systemctl start vsftpd
+    sudo systemctl enable vsftpd
+    Abre FileZilla y usa las credenciales del usuario ftpuser y la IP pública de tu EC2 para conectarte.
+
+    sudo yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+    sudo yum install -y mysql
+
+IP ELÁSTICA
+
+    Crear IP elástica en AWS, para que la IP nunca cambie y se pueda servir los dominios
+
+<VirtualHost *:80>
+    DocumentRoot "/var/www/html"
+    ServerName ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
+
+    <Directory "/var/www/html">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/my-vhost-error.log
+    CustomLog /var/log/httpd/my-vhost-access.log combined
+</VirtualHost>
+
+
+MYSQL DATABASE
+
+    Crear base de datos en RDS.
+
+    wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+
+    tar xzf phpMyAdmin-latest-all-languages.tar.gz
+    sudo mv phpMyAdmin-*/ /var/www/html/phpmyadmin
+
+    sudo chown -R apache:apache /var/www/html/phpmyadmin
+
+    sudo nano /var/www/html/phpmyadmin/config.inc.php
+
+<?php
+/* phpMyAdmin configuración básica */
+$i = 0;
+$i++;
+$cfg['blowfish_secret'] = 'Abfe04**Abfe04**Abfe04**Abfe04**'; /* Cambia esto por una cadena aleatoria */
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['Servers'][$i]['host'] = 'escdb.cp6cs62ii5xo.eu-south-2.rds.amazonaws.com';
+$cfg['Servers'][$i]['compress'] = false;
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+$cfg['Servers'][$i]['port'] = '3306';
+
+/* Otras configuraciones */
+$cfg['UploadDir'] = '';
+$cfg['SaveDir'] = '';
+?>
+
+    sudo systemctl restart httpd
+
+    http://ec2-51-92-121-143.eu-south-2.compute.amazonaws.com/phpmyadmin
+
+SSL
+    Solicita un Certificado en AWS Certificate Manager (ACM)
+
+    Ve a la consola de AWS Certificate Manager (ACM).
+    Haz clic en Request a certificate.
+    Selecciona Request a public certificate y haz clic en Next.
+    Ingresa tu dominio (e.g., yourdomain.com) y cualquier subdominio que quieras cubrir (e.g., www.yourdomain.com).
+    Elige el método de validación. Te recomiendo DNS validation, ya que es rápido y una vez configurado, el certificado se renovará automáticamente.
+    ACM te proporcionará un CNAME que debes agregar a tu Hosted Zone en Route 53. Haz esto para validar tu dominio.
+    Configura un Elastic Load Balancer (ELB)
+
+    AWS no permite adjuntar directamente un certificado ACM a una instancia EC2; necesitas un Elastic Load Balancer (ELB) para manejar el tráfico HTTPS. El ELB actuará como un proxy y redirigirá el tráfico a tu instancia EC2:
+
+    Ve a la consola de EC2 y selecciona Load Balancers en el panel de navegación.
+    Haz clic en Create Load Balancer y selecciona Application Load Balancer (ideal para aplicaciones web).
+    Configura el nombre del load balancer y selecciona Internet-facing para que sea accesible desde internet.
+    En Listeners, asegúrate de que esté seleccionado HTTP (80) y HTTPS (443).
+    Selecciona tus subnets y security groups (el security group debe permitir tráfico en los puertos 80 y 443).
+    En Secure listener settings, selecciona el certificado que creaste en ACM.
+    Configura el Target Group para redirigir el tráfico a tu instancia EC2. Selecciona Instance como tipo de destino y añade tu instancia EC2 al target group.
+    Ajusta tu Apache para Usar el Load Balancer
+
+    Asegúrate de que Apache en tu instancia EC2 esté escuchando en el puerto 80, ya que el ELB manejará las conexiones HTTPS y las redirigirá a tu instancia a través del puerto HTTP.
+
+    Actualiza el DNS en Route 53 para Usar el ELB
+
+    En tu Hosted Zone de Route 53, crea un nuevo registro A.
+    Selecciona Alias y en el Alias Target, elige tu Load Balancer.
+    De esta manera, tu dominio apuntará al ELB que manejará las conexiones HTTPS y las redirigirá a tu instancia.
+    Ventajas de Este Método
+    Renovación Automática: AWS ACM renovará automáticamente el certificado sin que tú tengas que intervenir.
+    Manejo Seguro de Tráfico: El ELB se encarga de la terminación SSL, garantizando que las conexiones entre tus usuarios y el ELB estén siempre seguras.
+    Escalabilidad: Si en el futuro necesitas escalar tu aplicación, el ELB facilitará añadir más instancias EC2 sin cambiar la configuración de dominio o SSL.
+    Con estos pasos, tendrás un certificado SSL gestionado por AWS y renovado automáticamente, manteniendo tus conexiones seguras.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
