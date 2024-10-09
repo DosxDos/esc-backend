@@ -1,7 +1,8 @@
-SSH HOST
+#SSH HOST
     ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
+    ec2-user
 
-CONFIGURACIÓN INICIAL
+#CONFIGURACIÓN INICIAL
 
     sudo yum update -y
 
@@ -37,7 +38,7 @@ CONFIGURACIÓN INICIAL
     sudo yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
     sudo yum install -y mysql
 
-IP ELÁSTICA
+#IP ELÁSTICA
 
     Crear IP elástica en AWS, para que la IP nunca cambie y se pueda servir los dominios
 
@@ -56,7 +57,7 @@ IP ELÁSTICA
 </VirtualHost>
 
 
-MYSQL DATABASE
+#MYSQL DATABASE
 
     Crear base de datos en RDS.
 
@@ -89,7 +90,65 @@ $cfg['SaveDir'] = '';
 
     http://ec2-51-92-121-143.eu-south-2.compute.amazonaws.com/phpmyadmin
 
-SSL
+EN PRODUCCIÓN: Restringir el Acceso a phpMyAdmin por IP
+
+    sudo nano /etc/httpd/conf.d/phpMyAdmin.conf
+
+<Directory /var/www/html/phpmyadmin>
+Order Deny,Allow
+Deny from all
+Allow from 123.45.67.89  # Reemplaza esto con tu IP pública
+</Directory>
+
+#GITHUB
+
+    sudo yum install git -y
+
+    cd /var/www/html
+
+    ssh-keygen -t ed25519 -C "anfego1@hotmail.com"
+
+    Varias veces enter hasta crear la clave ssh
+
+    cat ~/.ssh/id_ed25519.pub
+
+    Copiar la clave ssh y crearla en GITHUB
+
+    ssh -T git@github.com
+
+    sudo chown -R ec2-user:ec2-user /var/www/html
+
+    git clone git@github.com:DosxDos/esc-backend.git esc-backend
+
+    nano /var/www/html/esc-backend/webhookgithub.php
+
+    <?php
+// Ruta del proyecto
+$projectDir = '/var/www/html/esc-backend';
+
+// Lee el payload de GitHub
+$payload = file_get_contents('php://input');
+
+// Verifica que el payload esté presente
+if (!$payload) {
+    http_response_code(400);
+    die('Bad request: no payload received.');
+}
+
+// Ejecuta el comando de actualización del repositorio
+$output = shell_exec("cd {$projectDir} && git pull 2>&1");
+echo $output;
+?>
+
+    crear el webhook en el repositorio de GITHUB con el archivo php:
+
+    http://ec2-51-92-121-143.eu-south-2.compute.amazonaws.com/esc-backend/webhookgithub.php
+
+
+#SSL
+
+    Comprar dominio
+
     Solicita un Certificado en AWS Certificate Manager (ACM)
 
     Ve a la consola de AWS Certificate Manager (ACM).
