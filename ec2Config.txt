@@ -145,6 +145,28 @@ echo $output;
 #APACHE Y GITHUB
 apache ALL=(ALL) NOPASSWD: /usr/bin/git
 
+    sudo chown -R apache:apache /var/www/html/esc-backend
+
+    sudo mkdir /usr/share/httpd/.ssh
+    sudo chown apache:apache /usr/share/httpd/.ssh
+    sudo chmod 700 /usr/share/httpd/.ssh
+
+    sudo cp /home/ec2-user/.ssh/id_ed25519 /usr/share/httpd/.ssh/
+    sudo cp /home/ec2-user/.ssh/id_ed25519.pub /usr/share/httpd/.ssh/
+
+    sudo chown apache:apache /usr/share/httpd/.ssh/id_ed25519
+    sudo chown apache:apache /usr/share/httpd/.ssh/id_ed25519.pub
+    sudo chmod 600 /usr/share/httpd/.ssh/id_ed25519
+    sudo chmod 644 /usr/share/httpd/.ssh/id_ed25519.pub
+
+    sudo -u apache ssh -T git@github.com
+
+    sudo -u apache -s
+
+    cd /var/www/html/esc-backend
+
+    git pull
+
     crear el webhook en el repositorio de GITHUB con el archivo php:
 
     http://ec2-51-92-121-143.eu-south-2.compute.amazonaws.com/esc-backend/webhookgithub.php
