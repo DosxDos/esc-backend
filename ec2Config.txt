@@ -1,3 +1,12 @@
+#AWS DATA ROOT
+    soporte@galagaagency.com
+    Galagaagency2024*
+
+#AWS DATA USER
+    911167925263
+    anfego1
+    Abfe04**
+
 #SSH HOST
     ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
     ec2-user
@@ -210,22 +219,4 @@ apache ALL=(ALL) NOPASSWD: /usr/bin/git
     Escalabilidad: Si en el futuro necesitas escalar tu aplicación, el ELB facilitará añadir más instancias EC2 sin cambiar la configuración de dominio o SSL.
     Con estos pasos, tendrás un certificado SSL gestionado por AWS y renovado automáticamente, manteniendo tus conexiones seguras.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
