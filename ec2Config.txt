@@ -192,7 +192,7 @@ apache ALL=(ALL) NOPASSWD: /usr/bin/git
     Selecciona Request a public certificate y haz clic en Next.
     Ingresa tu dominio (e.g., yourdomain.com) y cualquier subdominio que quieras cubrir (e.g., www.yourdomain.com).
     Elige el método de validación. Te recomiendo DNS validation, ya que es rápido y una vez configurado, el certificado se renovará automáticamente.
-    ACM te proporcionará un CNAME que debes agregar a tu Hosted Zone en Route 53. Haz esto para validar tu dominio.
+    ACM te proporcionará un CNAME que debes agregar a tu Hosted Zone en Route 53. Haz esto para validar tu dominio. - Crear el registro con el botón de crear del AWS para que funcione
     Configura un Elastic Load Balancer (ELB)
 
     AWS no permite adjuntar directamente un certificado ACM a una instancia EC2; necesitas un Elastic Load Balancer (ELB) para manejar el tráfico HTTPS. El ELB actuará como un proxy y redirigirá el tráfico a tu instancia EC2:
@@ -204,11 +204,6 @@ apache ALL=(ALL) NOPASSWD: /usr/bin/git
     Selecciona tus subnets y security groups (el security group debe permitir tráfico en los puertos 80 y 443).
     En Secure listener settings, selecciona el certificado que creaste en ACM.
     Configura el Target Group para redirigir el tráfico a tu instancia EC2. Selecciona Instance como tipo de destino y añade tu instancia EC2 al target group.
-    Ajusta tu Apache para Usar el Load Balancer
-
-    Asegúrate de que Apache en tu instancia EC2 esté escuchando en el puerto 80, ya que el ELB manejará las conexiones HTTPS y las redirigirá a tu instancia a través del puerto HTTP.
-
-    Actualiza el DNS en Route 53 para Usar el ELB
 
     En tu Hosted Zone de Route 53, crea un nuevo registro A.
     Selecciona Alias y en el Alias Target, elige tu Load Balancer.
@@ -218,5 +213,39 @@ apache ALL=(ALL) NOPASSWD: /usr/bin/git
     Manejo Seguro de Tráfico: El ELB se encarga de la terminación SSL, garantizando que las conexiones entre tus usuarios y el ELB estén siempre seguras.
     Escalabilidad: Si en el futuro necesitas escalar tu aplicación, el ELB facilitará añadir más instancias EC2 sin cambiar la configuración de dominio o SSL.
     Con estos pasos, tendrás un certificado SSL gestionado por AWS y renovado automáticamente, manteniendo tus conexiones seguras.
+
+    Ajusta tu Apache para Usar el Load Balancer:
+
+    sudo nano /etc/httpd/conf.d/my-vhost.conf
+
+
+<VirtualHost *:80>
+    ServerName app-energiasolarcanarias-backend.com
+    DocumentRoot /var/www/html/esc-backend
+
+    <Directory "/var/www/html/esc-backend">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/app-energiasolarcanarias-error.log
+    CustomLog /var/log/httpd/app-energiasolarcanarias-access.log combined
+</VirtualHost>
+<VirtualHost *:80>
+    ServerName www.app-energiasolarcanarias-backend.com
+    DocumentRoot /var/www/html/esc-backend
+
+    <Directory "/var/www/html/esc-backend">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/app-energiasolarcanarias-error.log
+    CustomLog /var/log/httpd/app-energiasolarcanarias-access.log combined
+</VirtualHost>
+
+    sudo systemctl restart httpd
 
     
