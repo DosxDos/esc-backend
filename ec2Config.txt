@@ -11,6 +11,10 @@
     ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
     ec2-user
 
+#ARCHIVO DE VIRTUAL HOSTS DE APACHE
+
+    sudo nano /etc/httpd/conf.d/my-vhost.conf
+
 #ARCHIVO CONFIGURACIÓN DE APACHE
 
     sudo nano /etc/httpd/conf/httpd.conf
@@ -86,6 +90,8 @@ allow_writeable_chroot=YES
 #IP ELÁSTICA
 
     Crear IP elástica en AWS, para que la IP nunca cambie y se pueda servir los dominios
+
+    sudo nano /etc/httpd/conf.d/my-vhost.conf
 
 <VirtualHost *:80>
     DocumentRoot "/var/www/html"
@@ -190,7 +196,15 @@ echo $output;
 #APACHE Y GITHUB
 apache ALL=(ALL) NOPASSWD: /usr/bin/git
 
-    sudo chown -R apache:apache /var/www/html/esc-backend
+    #PERMISOS GENERALES Y GRUPO EN LA RAÍZ DE APACHE
+
+    for user in $(cut -f1 -d: /etc/passwd); do
+    sudo usermod -a -G apache $user
+    done
+
+    sudo chmod -R 775 /var/www/html
+
+    sudo chmod g+s /var/www/html
 
     sudo mkdir /usr/share/httpd/.ssh
     sudo chown apache:apache /usr/share/httpd/.ssh
@@ -311,13 +325,3 @@ IncludeOptional conf.d/*.conf
     RewriteCond %{REQUEST_METHOD} OPTIONS
     RewriteRule ^(.*)$ $1 [R=200,L]
 </Directory>
-
-#PERMISOS GENERALES Y GRUPO EN LA RAÍZ DE APACHE
-
-    for user in $(cut -f1 -d: /etc/passwd); do
-    sudo usermod -a -G apache $user
-    done
-
-    sudo chmod -R 775 /var/www/html
-
-    sudo chmod g+s /var/www/html
