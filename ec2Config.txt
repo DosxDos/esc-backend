@@ -21,7 +21,15 @@
 
 #REINICIAR APACHE
 
+    sudo systemctl restart httpd
+
+#DESCARTAR CAMBIOS GIT EN EL SERVIDOR
     
+    sudo -u apache -s
+    cd /var/www/html/esc-backend
+    git checkout -- .
+    git pull
+    exit
 
 #CONFIGURACIÓN INICIAL
 
@@ -284,6 +292,9 @@ CONFLICTOS (ELIMINAR)
     sudo systemctl restart httpd
 
 #CORS 
+
+    Se debe poner a apache como propietario del proyecto:
+    sudo chown -R apache:apache /var/www/html/esc-backend
 
     sudo nano /etc/httpd/conf/httpd.conf
 
