@@ -42,10 +42,26 @@
 
     sudo systemctl start vsftpd
     sudo systemctl enable vsftpd
-    Abre FileZilla y usa las credenciales del usuario ftpuser y la IP pública de tu EC2 para conectarte.
 
-    sudo yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
-    sudo yum install -y mysql
+    sudo nano /etc/vsftpd/vsftpd.conf
+
+pasv_enable=YES
+pasv_min_port=1024
+pasv_max_port=1048
+
+pasv_address=51.92.121.143
+
+local_root=/var/www/html
+chroot_local_user=YES
+allow_writeable_chroot=YES
+
+    sudo setfacl -m u:ftpuser:rwx /var/www/html
+
+    sudo systemctl restart vsftpd
+
+    Permitir Conexiones FTP en el Grupo de Seguridad en el puerto 21 y en los puertos pasivos 1024-1048
+
+    Abre FileZilla y usa las credenciales del usuario ftpuser y la IP pública de tu EC2 para conectarte.
 
 #IP ELÁSTICA
 
