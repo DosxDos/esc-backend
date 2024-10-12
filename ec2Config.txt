@@ -11,6 +11,18 @@
     ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
     ec2-user
 
+#ARCHIVO CONFIGURACIÓN DE APACHE
+
+    sudo nano /etc/httpd/conf/httpd.conf
+
+#VERIFICAR SINTAXIS APACHE
+
+    sudo apachectl configtest
+
+#REINICIAR APACHE
+
+    
+
 #CONFIGURACIÓN INICIAL
 
     sudo yum update -y
@@ -270,5 +282,21 @@ CONFLICTOS (ELIMINAR)
 </VirtualHost>
 
     sudo systemctl restart httpd
+
+#CORS 
+
+    sudo nano /etc/httpd/conf/httpd.conf
+
+IncludeOptional conf.d/*.conf
+<Directory "/var/www/html/esc-backend">
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, usuario, apiKey"
+    Header always set Access-Control-Allow-Credentials "true"
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+</Directory>
+
 
     
