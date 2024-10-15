@@ -34,6 +34,29 @@
             console.error('Error:', error);
         });
 
+    fetch('https://app-energiasolarcanarias-backend.com/usuarios/250', {
+        method: 'GET',
+        headers: {
+            'usuario': 'anfego1', // Cambia esto por el usuario que quieras enviar
+            'apiKey': 'Abfe04**'    // Cambia esto por tu API key
+        }
+    })
+        .then(response => {
+            // Verifica si la respuesta es exitosa
+            if (!response.ok) {
+                throw new Error(`Error en la solicitud: ${response.status}`);
+            }
+            return response.json(); // Convierte la respuesta a JSON
+        })
+        .then(data => {
+            // Maneja la respuesta JSON aquí
+            console.log('Respuesta de la API:', data);
+        })
+        .catch(error => {
+            // Maneja errores en la solicitud
+            console.error('Error:', error);
+        });
+
 </script>
 
 </html>
