@@ -325,3 +325,58 @@ IncludeOptional conf.d/*.conf
     RewriteCond %{REQUEST_METHOD} OPTIONS
     RewriteRule ^(.*)$ $1 [R=200,L]
 </Directory>
+
+#SELinux (SI EXISTEN MÁS DIFICULTADES DE PERMISOS DE ARCHIVOS)
+    (Security-Enhanced Linux) es un mecanismo de seguridad integrado en el núcleo de Linux que implementa un control de acceso basado en políticas de seguridad. Fue desarrollado por la Agencia de Seguridad Nacional de los Estados Unidos (NSA) para proporcionar un nivel adicional de control sobre los accesos que tienen los procesos y usuarios dentro del sistema operativo, mejorando la seguridad al limitar las capacidades que cada proceso o usuario puede tener.
+
+    Verificar el contexto de seguridad actual en la carpeta raíz de Apache
+    Primero, debes verificar cuál es el contexto de seguridad actual en la carpeta raíz de Apache (/var/www/html), ya que este contexto determina los permisos que SELinux aplica.
+
+    ls -Z /var/www/html
+
+    Respuesta:
+    system_u:object_r:httpd_sys_content_t:s0 conexion_esc-backend.json
+    unconfined_u:object_r:httpd_sys_content_t:s0 info.php
+    unconfined_u:object_r:httpd_sys_content_t:s0 esc-backend
+    unconfined_u:object_r:user_home_t:s0 phpmyadmin
+
+    Explicación de la respuesta:
+    system_u:object_r:httpd_sys_content_t:s0: Este es el contexto de seguridad asignado a conexion_esc-backend.json, info.php y esc-backend. Aquí:
+
+    system_u: El usuario de SELinux (usualmente, esto se refiere a un contexto del sistema).
+    object_r: Denota que es un contexto de objeto.
+    httpd_sys_content_t: Indica que este archivo es contenido servido por el servidor web Apache (httpd).
+    s0: Representa el nivel de sensibilidad.
+    unconfined_u:object_r:httpd_sys_content_t:s0: Similar a lo anterior, pero aquí el contexto de usuario (unconfined_u) indica que este proceso no está restringido por SELinux.
+
+    unconfined_u:object_r:user_home_t:s0: Este contexto se aplica a phpmyadmin, indicando que este directorio o archivo se clasifica como perteneciente al directorio personal del usuario. Esto puede ser problemático si phpmyadmin está en el directorio de Apache y no debería tener este contexto.
+
+    Para permitir que Apache escriba en la carpeta
+
+    sudo chcon -R -t httpd_sys_rw_content_t /var/www/html
+
+    Para hacer que el cambio sea permanente:
+   
+    sudo semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/html(/.*)?"
+    sudo restorecon -Rv /var/www/html
+
+    Asegúrate de que ftpuser tenga acceso:
+
+    Si ftpuser necesita acceso a /var/www/html, también debes cambiar el contexto de archivos para que ftpuser pueda leer y escribir en esos archivos.  
+
+    sudo chcon -R -t public_content_rw_t /var/www/html
+
+    Luego, asegúrate de que este contexto sea permanente:
+
+    sudo semanage fcontext -a -t public_content_rw_t "/var/www/html(/.*)?"
+    sudo restorecon -Rv /var/www/html
+
+    Asegúrate de reiniciar los servicios para aplicar las nuevas configuraciones:
+
+    sudo systemctl restart vsftpd
+    sudo systemctl restart httpd
+
+    
+
+
+
