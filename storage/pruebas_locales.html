@@ -11,56 +11,7 @@
     <h1>PRUEBAS DE LA APIREST</h1>
 </body>
 <script>
-    /*
-    fetch('http://localhost/esc-backend/usuarios', {
-        method: 'GET',
-        headers: {
-            'usuario': 'soporte@galagaagency.com', // Cambia esto por el usuario que quieras enviar
-            'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'    // Cambia esto por tu API key
-        }
-    })
-        .then(response => {
-            // Verifica si la respuesta es exitosa
-            if (!response.ok) {
-                throw new Error(`Error en la solicitud: ${response.status}`);
-            }
-            console.log(response);
-            return response.json(); // Convierte la respuesta a JSON
-        })
-        .then(data => {
-            // Maneja la respuesta JSON aquí
-            console.log('Respuesta de la API:', data);
-        })
-        .catch(error => {
-            // Maneja errores en la solicitud
-            console.error('Error:', error);
-        });
-    
-    fetch('http://localhost/esc-backend/usuarios/250', {
-        method: 'GET',
-        headers: {
-            'usuario': 'soporte@galagaagency.com', // Cambia esto por el usuario que quieras enviar
-            'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6**'    // Cambia esto por tu API key
-        }
-    })
-        .then(response => {
-            // Verifica si la respuesta es exitosa
-            if (!response.ok) {
-                throw new Error(`Error en la solicitud: ${response.status}`);
-            }
-            console.log(response);
-            return response.json(); // Convierte la respuesta a JSON
-        })
-        .then(data => {
-            // Maneja la respuesta JSON aquí
-            console.log('Respuesta de la API:', data);
-        })
-        .catch(error => {
-            // Maneja errores en la solicitud
-            console.error('Error:', error);
-        });
-        */
-
+   
     const loginRequest = (json) => {
         return new Promise((resolve, reject) => {
             fetch('http://localhost/esc-backend/login', {
@@ -68,7 +19,7 @@
                 body: json,
                 headers: {
                     'usuario': 'soporte@galagaagency.com',
-                    'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6**'
+                    'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'
                 }
             })
                 .then(response => {
@@ -77,24 +28,24 @@
                         // Verificar si fue un error de la API
                         //Intentar obtener el cuerpo de la respuesta como JSON
                         return response.clone().json().then(errorData => {
-                            error = {
+                            errorPersonalizado = {
                                 status: 'error',
                                 code: response.status,
                                 message: errorData.message || 'Error desconocido',
-                                errors: errorData.errors || []
+                                errors: errorData
                             };
-                            resolve(error);
+                            resolve(errorPersonalizado);
                         })
                             .catch(() => {
                                 // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
                                 return response.text().then(errorText => {
-                                    error = {
+                                    errorPersonalizado = {
                                         status: 'error',
                                         code: response.status,
                                         message: errorText || 'Error desconocido',
-                                        errors: []
+                                        errors: errorText
                                     };
-                                    resolve(error);
+                                    resolve(errorPersonalizado);
                                 });
                             });
                     }
@@ -104,35 +55,35 @@
                         .catch(() => {
                             // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
                             return response.text().then(errorText => {
-                                error = {
+                                errorPersonalizado = {
                                     status: 'error',
                                     code: response.status,
                                     message: errorText || 'Error desconocido',
-                                    errors: []
+                                    errors: errorText
                                 };
-                                resolve(error);
+                                resolve(errorPersonalizado);
                             });
                         });
                 })
                 .catch(error => {
                     // Verificar si el error fue de red
                     if (error.message === 'Failed to fetch') {
-                        error = {
+                        errorPersonalizado = {
                             status: 'error',
                             code: 0,
                             message: 'Error de red: No se pudo conectar con el servidor.',
-                            errors: []
+                            errors: error
                         };
-                        resolve(error);
+                        resolve(errorPersonalizado);
                     } else {
                         // Errores de otra naturaleza
-                        error = {
+                        errorPersonalizado = {
                             status: 'error',
                             code: response.status,
                             message: errorData.message || 'Error desconocido',
-                            errors: errorData.errors || []
+                            errors: error
                         };
-                        resolve(error);
+                        resolve(errorPersonalizado);
                     }
                 });
         })
@@ -155,7 +106,7 @@
     userData = {
         email: "soporte@galagaagency.com",
         password: "Galaga2024!",
-        idiomaUsuario: "es"
+        idiomaUsuario: "en"
     };
 
     login(userData);
