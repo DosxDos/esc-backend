@@ -11,11 +11,11 @@
     <h1>PRUEBAS DE LA APIREST</h1>
 </body>
 <script>
-    /*    
+    /*
         //USUARIO API 1
         const loginRequest = (json) => {
             return new Promise((resolve, reject) => {
-                fetch('http://localhost/esc-backend/login', {
+                fetch('https://app-energiasolarcanarias-backend.com/login', {
                     method: 'POST',
                     body: json,
                     headers: {
@@ -118,9 +118,9 @@
     //USUARIO API 2
     const loginRequest = (json) => {
         return new Promise((resolve, reject) => {
-            fetch('http://localhost/esc-backend/login', {
-                method: 'POST',
-                body: json,
+            fetch('https://app-energiasolarcanarias-backend.com/usuarios/360', {
+                method: 'GET',
+                //body: json,
                 headers: {
                     'usuario': 'thomas@galagaagency.com',
                     'apiKey': 'a288e6addd55e6a5284cf005c37ae0b59de19b3a24978f9355b3fe9e6cb1bcca6128dc'
