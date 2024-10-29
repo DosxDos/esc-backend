@@ -12,30 +12,47 @@
 </body>
 <script>
     
-        //USUARIO API 1
-        const loginRequest = (json) => {
-            return new Promise((resolve, reject) => {
-                fetch('https://app-energiasolarcanarias-backend.com/login', {
-                    method: 'POST',
-                    body: json,
-                    headers: {
-                        'usuario': 'soporte@galagaagency.com',
-                        'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'
-                    }
-                })
-                    .then(response => {
-                        // Verificar si el estado de la respuesta no es exitoso (códigos 4xx o 5xx)
-                        if (!response.ok) {
-                            // Verificar si fue un error de la API
-                            //Intentar obtener el cuerpo de la respuesta como JSON
-                            return response.clone().json().then(errorData => {
-                                errorPersonalizado = {
-                                    status: 'error',
-                                    code: response.status,
-                                    message: errorData.message || 'Error desconocido',
-                                    errors: errorData
-                                };
-                                resolve(errorPersonalizado);
+                //VALIDAR TOKEN
+        
+                const tokenRequest = (json) => {
+                return new Promise((resolve, reject) => {
+                    fetch('https://app-energiasolarcanarias-backend.com/token', {
+                        method: 'POST',
+                        body: json,
+                        headers: {
+                            'usuario': 'soporte@galagaagency.com',
+                            'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'
+                        }
+                    })
+                        .then(response => {
+                            // Verificar si el estado de la respuesta no es exitoso (códigos 4xx o 5xx)
+                            if (!response.ok) {
+                                // Verificar si fue un error de la API
+                                //Intentar obtener el cuerpo de la respuesta como JSON
+                                return response.clone().json().then(errorData => {
+                                    errorPersonalizado = {
+                                        status: 'error',
+                                        code: response.status,
+                                        message: errorData.message || 'Error desconocido',
+                                        errors: errorData
+                                    };
+                                    resolve(errorPersonalizado);
+                                })
+                                    .catch(() => {
+                                        // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
+                                        return response.text().then(errorText => {
+                                            errorPersonalizado = {
+                                                status: 'error',
+                                                code: response.status,
+                                                message: errorText || 'Error desconocido',
+                                                errors: errorText
+                                            };
+                                            resolve(errorPersonalizado);
+                                        });
+                                    });
+                            }
+                            return response.clone().json().then(data => {
+                                resolve(data);
                             })
                                 .catch(() => {
                                     // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
@@ -49,9 +66,78 @@
                                         resolve(errorPersonalizado);
                                     });
                                 });
-                        }
-                        return response.clone().json().then(data => {
-                            resolve(data);
+                        })
+                        .catch(error => {
+                            // Verificar si el error fue de red
+                            if (error.message === 'Failed to fetch') {
+                                errorPersonalizado = {
+                                    status: 'error',
+                                    code: 0,
+                                    message: 'Error de red: No se pudo conectar con el servidor.',
+                                    errors: error
+                                };
+                                resolve(errorPersonalizado);
+                            } else {
+                                // Errores de otra naturaleza
+                                errorPersonalizado = {
+                                    status: 'error',
+                                    code: response.status,
+                                    message: errorData.message || 'Error desconocido',
+                                    errors: error
+                                };
+                                resolve(errorPersonalizado);
+                            }
+                        });
+                })
+            }
+        
+            const validarToken = async (object) => {
+                json = JSON.stringify(object),
+                    response = await tokenRequest(json);
+                if (response.status == "error") {
+                    //Lógica para manejar una respuesta de error
+                    console.error(response);
+                    console.error(response.message);
+                } else {
+                    //Lógica para manejar una respuesta exitosa
+                    console.log(response);
+                    console.log(response.message);
+                }
+            }
+        
+            tokenData = {
+                id: 2,
+                token: "e712002c81f01faa0f42af0068a285d6",
+            };
+        
+            validarToken(tokenData);
+
+
+/*
+    //USUARIO API 1
+    const loginRequest = (json) => {
+        return new Promise((resolve, reject) => {
+            fetch('https://app-energiasolarcanarias-backend.com/login', {
+                method: 'POST',
+                body: json,
+                headers: {
+                    'usuario': 'soporte@galagaagency.com',
+                    'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'
+                }
+            })
+                .then(response => {
+                    // Verificar si el estado de la respuesta no es exitoso (códigos 4xx o 5xx)
+                    if (!response.ok) {
+                        // Verificar si fue un error de la API
+                        //Intentar obtener el cuerpo de la respuesta como JSON
+                        return response.clone().json().then(errorData => {
+                            errorPersonalizado = {
+                                status: 'error',
+                                code: response.status,
+                                message: errorData.message || 'Error desconocido',
+                                errors: errorData
+                            };
+                            resolve(errorPersonalizado);
                         })
                             .catch(() => {
                                 // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
@@ -65,54 +151,70 @@
                                     resolve(errorPersonalizado);
                                 });
                             });
+                    }
+                    return response.clone().json().then(data => {
+                        resolve(data);
                     })
-                    .catch(error => {
-                        // Verificar si el error fue de red
-                        if (error.message === 'Failed to fetch') {
-                            errorPersonalizado = {
-                                status: 'error',
-                                code: 0,
-                                message: 'Error de red: No se pudo conectar con el servidor.',
-                                errors: error
-                            };
-                            resolve(errorPersonalizado);
-                        } else {
-                            // Errores de otra naturaleza
-                            errorPersonalizado = {
-                                status: 'error',
-                                code: response.status,
-                                message: errorData.message || 'Error desconocido',
-                                errors: error
-                            };
-                            resolve(errorPersonalizado);
-                        }
-                    });
-            })
-        }
-    
-        const login = async (object) => {
-            json = JSON.stringify(object),
-                response = await loginRequest(json);
-            if (response.status == "error") {
-                //Lógica para manejar una respuesta de error
-                console.error(response);
-                console.error(response.message);
-            } else {
-                //Lógica para manejar una respuesta exitosa
-                console.log(response);
-                console.log(response.message);
-            }
-        }
-    
-        userData = {
-            email: "thomas@galagaagency.com",
-            password: "Galaga2024*",
-            idiomaUsuario: "en"
-        };
-    
-        login(userData);
-    
+                        .catch(() => {
+                            // Si no es posible parsear el cuerpo como JSON, obtenerlo como texto
+                            return response.text().then(errorText => {
+                                errorPersonalizado = {
+                                    status: 'error',
+                                    code: response.status,
+                                    message: errorText || 'Error desconocido',
+                                    errors: errorText
+                                };
+                                resolve(errorPersonalizado);
+                            });
+                        });
+                })
+                .catch(error => {
+                    // Verificar si el error fue de red
+                    if (error.message === 'Failed to fetch') {
+                        errorPersonalizado = {
+                            status: 'error',
+                            code: 0,
+                            message: 'Error de red: No se pudo conectar con el servidor.',
+                            errors: error
+                        };
+                        resolve(errorPersonalizado);
+                    } else {
+                        // Errores de otra naturaleza
+                        errorPersonalizado = {
+                            status: 'error',
+                            code: response.status,
+                            message: errorData.message || 'Error desconocido',
+                            errors: error
+                        };
+                        resolve(errorPersonalizado);
+                    }
+                });
+        })
+    }
 
+    const login = async (object) => {
+        json = JSON.stringify(object),
+            response = await loginRequest(json);
+        if (response.status == "error") {
+            //Lógica para manejar una respuesta de error
+            console.error(response);
+            console.error(response.message);
+        } else {
+            //Lógica para manejar una respuesta exitosa
+            console.log(response);
+            console.log(response.message);
+        }
+    }
+
+    userData = {
+        email: "thomas@galagaagency.com",
+        password: "Galaga2024*",
+        idiomaUsuario: "en"
+    };
+
+    login(userData);
+
+*/
 
     /*
     //USUARIO API 2
