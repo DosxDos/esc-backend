@@ -11,6 +11,9 @@
     ec2-51-92-121-143.eu-south-2.compute.amazonaws.com
     ec2-user
 
+#CARPETA DEL PROYECTO
+cd /var/www/html/esc-backend
+
 #ARCHIVO DE VIRTUAL HOSTS DE APACHE
 
     sudo nano /etc/httpd/conf.d/my-vhost.conf
