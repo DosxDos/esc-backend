@@ -19,10 +19,6 @@
                     fetch('https://app-energiasolarcanarias-backend.com/token', {
                         method: 'POST',
                         body: json,
-                        headers: {
-                            'usuario': 'soporte@galagaagency.com',
-                            'apiKey': '14f4b345084262db658af2bf8d09745d6cf4a8450dd1d8333ca427f48ab484db34efe6'
-                        }
                     })
                         .then(response => {
                             // Verificar si el estado de la respuesta no es exitoso (códigos 4xx o 5xx)
@@ -106,8 +102,8 @@
             }
         
             tokenData = {
-                id: 2,
-                token: "e712002c81f01faa0f42af0068a285d6",
+                id: 1,
+                token: "93634423feb0329044d5a1df2d7fc211",
             };
         
             validarToken(tokenData);
